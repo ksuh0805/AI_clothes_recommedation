@@ -1,0 +1,1 @@
+# KT_Intern_recommedation_뭐입지니
