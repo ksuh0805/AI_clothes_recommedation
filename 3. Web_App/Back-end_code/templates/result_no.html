@@ -1,0 +1,485 @@
+<!--결과가 안나왔을 경우 지도상에 의류매장을 표시해주는 페이지입니다.-->
+<!doctype html>
+<html lang="en" class="h-100">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.84.0">
+    <title>추천 결과 없음</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/cover/">
+
+    <!-- Bootstrap core CSS -->
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/css/equalizer.css" rel="stylesheet">
+
+
+   <style type="text/css">
+        html {
+            height: 100%
+        }
+
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0
+        }
+
+        #map_div {
+            width: 100%;
+            height: 100%;
+        }
+        .shadow {
+  box-shadow: 0 0 5px #888;
+}
+#map {
+  margin: 0;
+  padding: 0;
+}
+#feedback {
+  background: #fff;
+  color: #444;
+  position: absolute;
+  font-family: arial;
+  height: 104px;
+  /*right: 10px;*/
+  left:10px;
+  margin: 5px;
+  padding: 10px;
+  top: 10px;
+  width: 170px;
+  z-index: 40;
+}
+#note,
+#hint {
+  font-size: 80%;
+}
+#note {
+  font-weight: 700;
+  padding: 0 0 10px 0;
+}
+#layerList {
+  width: 200px;
+}
+.dojoDndItemOver {
+  background: #ccc;
+}
+
+#list {
+  background: #fff;
+  color: #444;
+  position: absolute;
+  font-family: arial;
+  height: 550px;
+  /*right: 10px;*/
+  left:10px;
+  margin: 5px;
+  padding: 10px;
+  top: 142px;
+  width: 170px;
+  z-index: 40;
+  overflow:auto;
+}
+
+.menu ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+.menu li {
+    padding: 4px;
+    margin-bottom: 2px;
+    background-color: #33b5e5;
+    color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    font-size: 12px
+}
+.menu li:hover {
+    background-color: #0099cc;
+}
+h3 {
+  margin: 0 0 5px 0;
+  border-bottom: 1px solid #444;
+}
+
+.colorChk{
+  width: 0px
+}
+    </style>
+    <script
+    src="https://gis.kt.com/maps/v3.0/sdk.js?key=642dd03a4712cef8bb36de4d06f8dd86565a738470cb4c697fa6cbcff6f8c65c6a66b0c4"></script>
+
+
+    <!-- Custom styles for this template -->
+    <link href="../static/css/index.css" rel="stylesheet">
+    <link href="../static/css/result.css" rel="stylesheet">
+  </head>
+  <body class="d-flex h-100 text-center text-white bg-dark">
+
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+  <header class="mb-auto">
+    <div>
+        <input type="image" class="float-md-start mb-0" src="../static/src/images/logo.png" style="width: 180px; height: 40px;">
+        <nav class="nav nav-masthead justify-content-center float-md-end">
+        <a class="nav-link" aria-current="page" href="#">시작</a>
+        <a class="nav-link" href="#">유저</a>
+        <a class="nav-link" href="#">옷장</a>
+        <a class="nav-link active" href="#">추천</a>
+
+      </nav>
+    </div>
+  </header>
+
+  <div class="col">
+    <br><br><br>
+    <h2>뭐입지니의 추천이 없어요.</h2>
+    <br>
+
+    <div class="card shadow-sm">
+    </div>
+    <div id="map_div">
+      <!--<div id="list" class="shadow">-->
+        <!--<h3>주변 상점 목록</h3>-->
+        <!--<div class="col-3 menu">-->
+          <!--<ul id="extentList">-->
+          <!--</ul>-->
+        <!--</div>-->
+      <!--</div>-->
+    </div>
+    <script>
+      $class("olleh.maps.overlay.CustomMarker").extend(olleh.maps.overlay.Marker).define({
+          setOptions: function (t) {
+              t.label && (this.label = t.label)
+              t.icon && this.setIcon(t.icon),
+                  t.angle && this.setAngle(t.angle),
+                  t.shadow && this.setShadow(t.shadow),
+                  t.caption && this.setCaption(t.caption),
+                  t.cursor && this.setCursor(t.cursor),
+                  t.title && this.setTitle(t.title),
+                  t.draggable && this.setDraggable(t.draggable),
+                  t.flat && this.setFlat(t.flat),
+                  t.animation && this.setAnimation(t.animation),
+                  olleh.maps.overlay.Marker.$super.setOptions.apply(this, arguments)
+          },
+          _updateIcon: function () {
+              var t = this._icon
+                  , e = this._iconImg;
+              if (!t) {
+                  var i = olleh.maps.overlay.Marker;
+                  t = olleh.maps.browser.isHD ? i.DEFAULT_HD_ICON : olleh.maps.browser.isMobile ? i.DEFAULT_MOBILE_ICON : i.DEFAULT_ICON,
+                      this._icon = t,
+                      this.setIcon(t)
+              }
+              if (!e) {
+                  var s = olleh.maps.Element.create("div").setStyle("position", "absolute");
+                  if (this.label) {
+                      var wid = this.label.length * -7 + 'px'
+                      var wid2 = this.label.length * 7 * 2 + 'px'
+                      var span = olleh.maps.Element.create("div").setStyles({ "text-align":"center", "border":"solid", "box-shadow":"2px 2px 5px #999", "border-radius":"10px", "position": "absolute", "left": wid, width: wid2, 'font-family': 'sans-serif', 'background-color': "#4682b4", "font-size": "15px", "color": "white"})
+                      span.appendChild(document.createTextNode(this.label))
+                      s.appendChild(span)
+                  }
+                  e = this._iconImg = new olleh.maps.SpritedImage,
+
+                      s.appendChild(e),
+                      this._updateCursor(),
+                      this.registerElement("upper_overlay_pane", s.elem),
+                      this.registerEventDom(this._iconImg.elem)
+
+              }
+              this._currentIcon != t && (e.setStyles({
+                  width: t.size.width + "px",
+                  height: t.size.height + "px",
+                  marginLeft: -t.anchor.x + "px",
+                  marginTop: -t.anchor.y + "px"
+              }).setImage(t.url, t.origin, t.scaledSize),
+                  this._currentIcon = t);
+              var o = 100 - 100 * (t.size.width - t.anchor.x) / t.size.width + "% " + (100 - 100 * (t.size.height - t.anchor.y) / t.size.height) + "%";
+              e.setStyle("transformOrigin", o)
+          },
+      });
+
+       // 현재 위치설정
+       cur_location = new olleh.maps.LatLng({
+          x: 127.11493244834908,
+          y: 37.358691100129036,
+        });
+
+        utmkCurLoc = olleh.maps.UTMK.valueOf(cur_location);
+
+        console.log(utmkCurLoc);
+
+        var mapOpts = {
+        center: new olleh.maps.UTMK(967395.8525411495, 1927143.4137534683),
+        zoom: 7,    // default 9
+        mapTypeId: 'ROADMAP'
+        };
+
+        map = new olleh.maps.Map(document.getElementById('map_div'), mapOpts);
+
+      // 옷가게 marker, infowindow 생성
+      function printPoint(sex_style) {
+          for (var i = 0; i < 5; i++) {
+
+              latlng_pos = new olleh.maps.LatLng({
+                  y: sex_style[i].lat,
+                  x: sex_style[i].lng
+              });
+              utmk_pos = olleh.maps.UTMK.valueOf(latlng_pos);
+              var marker = new olleh.maps.overlay.CustomMarker({
+                  position: utmk_pos,
+                  map: map,
+                  label: sex_style[i].name,
+                  animation: olleh.maps.overlay.Marker.DROP
+              });
+
+
+              let firstInfoWindow = null
+              const firstInfoWindowMaker = (marker) => {
+                  if (firstInfoWindow) {
+                      firstInfoWindow.close();
+                      delete firstInfoWindow;
+                  }
+                  let tmpl = '<h4>' + sex_style[i].name + '</h4><ul>'
+                  firstInfoWindow = new olleh.maps.overlay.InfoWindow({
+                      position: utmk_pos,
+                      content: olleh.maps.util.applyTemplate(tmpl, null),
+                  });
+                  firstInfoWindow.open(map, marker);
+              }
+              <!--firstInfoWindowMaker(marker);-->
+              <!--document.getElementById('extentList').innerHTML += '<li>' + sex_style[i].name + '</li>';-->
+          }
+      }
+
+
+
+      // LatLng(y, x)
+      const female_business = [
+          {
+              'name': '롯데백화점 수원점',
+              'lat': 37.2644816736091,
+              'lng': 126.9971951111719,
+          },
+          {
+              'name': '미스지 콜렉션',
+              'lat': 37.38539586383252,
+              'lng': 127.12960072445844
+          },
+          {
+              'name': '미쉔주 분당점',
+              'lat': 37.38539586383252,
+              'lng': 127.12960072445844
+          },
+          {
+              'name': '김연주 현대백화점 판교점',
+              'lat': 37.392719009466404,
+              'lng': 127.11198471907251
+          },
+          {
+              'name': '후라밍고 2001 아울렛 분당점',
+              'lat': 37.34918937161188,
+              'lng': 127.10731392277303
+          }
+      ]
+      const female_casual = [
+          {
+              'name': '세컨스킨 현대백화점 판교점',
+              'lat': 37.39278720121206,
+              'lng': 127.11200617674422,
+          },
+          {
+              'name': '이자벨마랑',
+              'lat': 37.39271048549383,
+              'lng': 127.1118774307141,
+          },
+          {
+              'name': 'marron',
+              'lat': 37.36977372975187,
+              'lng': 127.10637666695278,
+          },
+          {
+              'name': '로미스토리 서현점',
+              'lat': 37.38654589819978,
+              'lng': 127.124799668705,
+          },
+          {
+              'name': '구호 현대백화점 판교점',
+              'lat': 37.392719009466276,
+              'lng': 127.11196326131541,
+          },
+
+      ]
+      const female_sports = [
+          {
+              'name': '아디다스 이마트 분당점',
+              'lat': 37.35890134110963,
+              'lng': 127.11967405336277
+
+          },
+          {
+              'name': 'JDX 2001아울렛 분당점',
+              'lat': 37.349352236492614,
+              'lng': 127.10729173488785
+
+          },
+          {
+              'name': '아디다스골프 롯데백화점 분당점',
+              'lat': 37.37859966597896,
+              'lng': 127.11433505521092
+
+          },
+          {
+              'name': '골프에비뉴 분당점',
+              'lat': 37.352544109653465,
+              'lng': 127.1022599552101
+
+          },
+          {
+              'name': '파리게이츠',
+              'lat': 37.39323014517015,
+              'lng': 127.11201686576555
+
+          },
+
+      ]
+      const male_business = [
+          {
+              'name': '롯데백화점 수원점',
+              'lat': 37.2644816736091,
+              'lng': 126.9971951111719
+          },
+          {
+              'name': '맞춤정장 마테아',
+              'lat': 37.36266763743211,
+              'lng': 127.10744633815963
+          },
+          {
+              'name': '구구스 분당정자점',
+              'lat': 37.36917959299875,
+              'lng': 127.10771994001111
+          },
+          {
+              'name': '나이브 시루엣',
+              'lat': 37.3701614876049,
+              'lng': 127.11402409215137
+          },
+          {
+              'name': '제이제이리퍼블릭 분당점',
+              'lat': 37.52093769344175,
+              'lng': 127.022582655746
+          }
+
+      ]
+      const male_casual = [
+          {
+              'name': '스톤아일랜드',
+              'lat': 37.39270196152029,
+              'lng': 127.11203836325173
+          },
+          {
+              'name': '빈폴(남성) 신세계백화점 경기점',
+              'lat': 37.3251607763452,
+              'lng': 127.10816263414577
+          },
+          {
+              'name': '송지오옴므 신세계백화점 경기점',
+              'lat': 37.325108976474574,
+              'lng': 127.10811003996643
+          },
+          {
+              'name': '시스템옴므',
+              'lat': 37.392719009466404,
+              'lng': 127.11194180372918
+          },
+          {
+              'name': '알레그리',
+              'lat': 37.392744581378295,
+              'lng': 127.11195253256498
+          },
+
+      ]
+      const male_sports = [
+          {
+              'name': '아디다스 이마트 분당점',
+              'lat': 37.35890134110963,
+              'lng': 127.11967405336277
+
+          },
+          {
+              'name': 'JDX 2001아울렛 분당점',
+              'lat': 37.349352236492614,
+              'lng': 127.10729173488785
+
+          },
+          {
+              'name': '아디다스골프 롯데백화점 분당점',
+              'lat': 37.37859966597896,
+              'lng': 127.11433505521092
+
+          },
+          {
+              'name': '골프에비뉴 분당점',
+              'lat': 37.352544109653465,
+              'lng': 127.1022599552101
+
+          },
+          {
+              'name': '파리게이츠',
+              'lat': 37.39323014517015,
+              'lng': 127.11201686576555
+
+          },
+
+      ]
+
+      <!--변수 값-->
+      <!--var sexCategory = '{{sexCategory}}';-->
+      var sexCategory = 'female_business'
+      console.log(sexCategory);
+      if (sexCategory == 'female_business') {
+        printPoint(female_business);
+      }
+      else if (sexCategory == 'female_sports') {
+        printPoint(female_sports);
+      }
+      else if (sexCategory == 'female_casual') {
+        printPoint(female_casual);
+      }
+      else if (sexCategory == 'male_business') {
+        printPoint(male_business);
+      }
+      else if (sexCategory == 'male_sports') {
+        printPoint(male_sports);
+      }
+      else {
+        printPoint(male_casual);
+      }
+
+      // 현재 위치 마커
+      var cur_marker = new olleh.maps.overlay.CustomMarker({
+          position: utmkCurLoc,
+          map: map,
+          label: '현재 위치',
+          animation: olleh.maps.overlay.Marker.BOUNCE,
+          icon: {
+              url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Map_marker.svg/391px-Map_marker.svg.png',
+              size: new olleh.maps.Size(27, 47)
+          }
+      });
+    </script>
+    <br>
+    <h2>주변 가게 정보입니다.</h2>
+  </div>
+
+  <footer class="mt-auto text-white-50">
+    <p>KT IT인턴 9조 뭐입지니</p>
+  </footer>
+</div>
+
+  </body>
+  <script src="../static/js/detail.js"></script>
+
+</html>

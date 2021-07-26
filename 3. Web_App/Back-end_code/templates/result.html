@@ -1,0 +1,69 @@
+<!--지니가 추천해 주는 옷을 보여주고 적합도를 표시해주는 화면입니다.-->
+<!doctype html>
+<html lang="en" class="h-100">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>뭐입지니 추천</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/cover/">
+
+    <!-- CSS -->
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/css/equalizer.css" rel="stylesheet">
+    <link href="../static/css/index.css" rel="stylesheet">
+    <link href="../static/css/result.css" rel="stylesheet">
+  </head>
+  <body class="d-flex h-100 text-center text-white bg-dark">
+
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+  <header class="mb-auto">
+    <div>
+      <input type="image" class="float-md-start mb-0" src="../static/src/images/logo.png" style="width: 180px; height: 40px;">
+      <nav class="nav nav-masthead justify-content-center float-md-end">
+        <a class="nav-link" aria-current="page" href="#">시작</a>
+        <a class="nav-link" href="#">유저</a>
+        <a class="nav-link" href="#">옷장</a>
+        <a class="nav-link active" href="#">추천</a>
+
+      </nav>
+    </div>
+  </header>
+
+  <div class="col">
+     <br><br><br>
+     <h2>뭐입지니의 추천이에요.</h2>
+     <br>
+
+      <table>
+          <tr style = "text-align : center">
+            <th><input type="image" src="{{ url_for('static', filename=top_img) }}" height="300" width="300"></th>
+            <th><h2>적합도 : {{per}} %</h2></th>
+          </tr>
+          <tr style = "text-align : center">
+            <td><input type="image" src="{{ url_for('static', filename=bottom_img) }}" height="400" width="300"></td>
+            <td><h2>상의/하의 : {{reco_res}}</h2></td>
+          </tr>
+      </table>
+      <input type="hidden" id="location" value="{{t_path}}" >
+   </div>
+  <footer class="mt-auto text-white-50">
+    <p>KT IT인턴 9조 뭐입지니</p>
+  </footer>
+</div>
+
+  </body>
+    <script>
+        const geopath = document.getElementById('location').value;
+        console.log("test")
+
+        if (geopath == "geo") {
+            window.location.replace("http://127.0.0.1:5000/result_no")
+        }
+        else {
+            console.log("NOT COME")
+        }
+    </script>
+     <script src="../static/js/detail.js"></script>
+
+</html>
